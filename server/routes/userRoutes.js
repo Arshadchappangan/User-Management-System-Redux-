@@ -1,4 +1,6 @@
 const express = require('express');
+const { userSignup, userLogin, userLogout, getUserProfile } = require('../controllers/userController');
+const protect = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 router.get('/',(req,res) => {
@@ -7,7 +9,10 @@ router.get('/',(req,res) => {
 
 router.post('/signup', userSignup);
 router.post('/login', userLogin);
+router.post('/logout', userLogout);
+router.get('/profile',protect,getUserProfile);
 
 
 
 module.exports = router;
+

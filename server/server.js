@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/',userRoutes)
+app.use('/api/users',userRoutes)
 
 connectDB();
 
