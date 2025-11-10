@@ -1,3 +1,0 @@
-0000000000000000000000000000000000000000 7e87c8e2168c4e39178202b5e739f43d0e6cf7b7 Arshad Chappangan <arshadchappangan349@gmail.com> 1762752489 +0530	commit (initial): first commit
-7e87c8e2168c4e39178202b5e739f43d0e6cf7b7 7e87c8e2168c4e39178202b5e739f43d0e6cf7b7 Arshad Chappangan <arshadchappangan349@gmail.com> 1762752537 +0530	Branch: renamed refs/heads/master to refs/heads/main
-7e87c8e2168c4e39178202b5e739f43d0e6cf7b7 b076aad27faf3a0f99581b74f274364e60b6835b Arshad Chappangan <arshadchappangan349@gmail.com> 1762768581 +0530	commit: server setup and db connection
