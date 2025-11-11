@@ -1,6 +1,6 @@
 import React from 'react'
 
-const InputField = ({label,type,placeholder,svg_path}) => {
+const InputField = ({handleChange,label,type, name,placeholder,svg_path,err}) => {
   return (
     <div className="space-y-2">
           <label
@@ -27,10 +27,10 @@ const InputField = ({label,type,placeholder,svg_path}) => {
             </div>
             <input
               type={type}
-              id={type}
-              name={type}
+              name={name}
               placeholder={placeholder}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition duration-200"
+              onChange={handleChange}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border ${err ? 'border-red-500' : 'border-white/20'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${ err ? 'focus: ring-red-500' : 'focus: ring-amber-400'} focus:border-transparent transition duration-200`}
             />
           </div>
         </div>

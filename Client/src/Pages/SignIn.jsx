@@ -1,13 +1,42 @@
+import axios from "axios";
 import InputField from "../Components/InputField";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { login } from "../Redux/userSlice";
+import { useNavigate } from "react-router-dom";
 
 
 const icon_paths = {
     email: 'M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207',
-    passowrd: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
+    password: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
 }
 
 const SignIn = () => {
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [form, setForm] = useState({ email: '', password: '' });
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:3555/signin', form)
+            if(response.status === 200) {
+                toast.success('Sign In Successfull');
+                dispatch(login(response.data));
+                console.log(response.data);
+                response.data.role === 'user' ? navigate('/') : navigate('/dashboard')
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response.data.message || 'Something went wrong while Sign In')
+        }
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-zinc-900 to-slate-900 p-4 relative overflow-hidden">
@@ -47,10 +76,25 @@ const SignIn = () => {
                     </div>
 
                     {/* Form */}
-                    <form className="space-y-5">
+                    <form className="space-y-5" onSubmit={handleSubmit}>
 
-                        <InputField label='Email' type='email' placeholder='you@example.com' svg_path={icon_paths.email} />
-                        <InputField label='Password' type='password1' placeholder='Enter your password' svg_path={icon_paths.passowrd} />
+                        <InputField
+                            label='Email'
+                            type='email'
+                            name='email'
+                            placeholder='you@example.com'
+                            svg_path={icon_paths.email}
+                            handleChange={handleChange}
+                        />
+
+                        <InputField
+                            label='Password'
+                            type='password'
+                            name='password'
+                            placeholder='Enter your password'
+                            svg_path={icon_paths.password}
+                            handleChange={handleChange}
+                        />
 
                         {/* Submit Button */}
                         <button

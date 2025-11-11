@@ -8,7 +8,7 @@ router.get('/',(req,res) => {
 })
 
 router.post('/signup', userSignup);
-router.post('/login', userLogin);
+router.post('/signin', userLogin);
 router.post('/logout', userLogout);
 router.get('/profile',protect,getUserProfile);
 

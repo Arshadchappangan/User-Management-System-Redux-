@@ -1,7 +1,6 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const createToken = require('../utils/createToken');
-const { use } = require('react');
 
 
 
@@ -17,8 +16,8 @@ const userSignup = async (req,res) => {
         return res.status(400).send('User Already Existing')
     }
 
-    let salt = bcrypt.genSalt(10);
-    let hashedPassword = bcrypt.hash(password,salt);
+    let salt = await bcrypt.genSalt(10);
+    let hashedPassword = await bcrypt.hash(password,salt);
 
     const newUser = new User({
         name,
@@ -37,6 +36,7 @@ const userSignup = async (req,res) => {
 }
 
 const userLogin = async (req,res) => {
+    console.log(req.body)
     const {email,password} = req.body;
 
     let user = await User.findOne({email});
@@ -46,7 +46,8 @@ const userLogin = async (req,res) => {
         return res.status(200).json({
             _id : user._id, 
             name : user.name, 
-            email : user.email
+            email : user.email,
+            role : user.role
         })
     }
     
