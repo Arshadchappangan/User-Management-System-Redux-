@@ -3,6 +3,7 @@ import InputField from "../Components/InputField";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const icon_paths = {
   name: "M12 4a4 4 0 1 1 0 8a4 4 0 0 1 0-8zM4 20c0-4 4-6 8-6s8 2 8 6",
@@ -100,7 +101,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3555/signup", {
+      const response = await axios.post(`${backendUrl}/signup`, {
         name: form.name,
         email: form.email,
         password: form.password,
@@ -214,7 +215,7 @@ const SignUp = () => {
               Already have an account?{" "}
               <span
                 className="text-amber-400 font-semibold hover:text-amber-300 cursor-pointer"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/signin")}
               >
                 Login here
               </span>

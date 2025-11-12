@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { login } from "../Redux/userSlice";
 import { useNavigate } from "react-router-dom";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 const icon_paths = {
@@ -24,8 +25,10 @@ const SignIn = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(form);
+        
         try {
-            const response = await axios.post('http://localhost:3555/signin', form)
+            const response = await axios.post(`${backendUrl}/signin`, form)
             if(response.status === 200) {
                 toast.success('Sign In Successfull');
                 dispatch(login(response.data));
@@ -110,6 +113,7 @@ const SignIn = () => {
                         <p className="text-sm text-gray-300">
                             Don't have an account?{" "}
                             <a
+                                onClick={() => navigate('/signup')}
                                 href="#"
                                 className="text-amber-400 font-semibold hover:text-amber-300 transition duration-200"
                             >

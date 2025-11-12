@@ -65,16 +65,42 @@ const userLogout = async (req,res) => {
 }
 
 
-const getUserProfile = async (req,res) => {
-    const user = await User.findOne({_id:req._id});
-    if(user) {
-        return res.json({
-            _id : user._id,
-            name : user.name,
-            email : user.email
-        })
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId).select('-password');
+
+    if (!user) {
+      return res.status(404).send('User Not Found');
     }
-    return res.status(404).send('User Not Found');
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+const uploadProfile = async (req, res) => {
+  try {
+
+    const userId = req.user._id
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {profileImage: req.file.filename },
+      {new: true}
+    )
+
+    if(!user) {
+      return res.status(404).json({message: 'User not found'})
+    }
+    
+    res.status(201).json({success: true, message: 'Image uploaded', profileImage: user.profileImage})
+    
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({message: 'Server error'})
+  }
 }
 
 
@@ -82,5 +108,6 @@ module.exports = {
     userSignup,
     userLogin,
     userLogout,
-    getUserProfile
+    getUserProfile,
+    uploadProfile
 }
