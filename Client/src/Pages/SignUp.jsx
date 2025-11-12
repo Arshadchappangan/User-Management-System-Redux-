@@ -112,7 +112,7 @@ const SignUp = () => {
       if (response.status == 201) {
         dispatch({ type: types.RESET_FORM });
         toast.success("User Registration Successful");
-        setTimeout(() => navigate("/signin"),2000)
+        setTimeout(() => navigate("/signin"),1000)
       }
     } catch (error) {
       console.error(error);

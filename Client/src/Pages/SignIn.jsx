@@ -18,26 +18,30 @@ const SignIn = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [form, setForm] = useState({ email: '', password: '' });
+    const [errors, setErrors] = useState({ email: '', password: '' })
 
     const handleChange = (e) => {
+        setErrors({...errors,[e.target.name]:''})
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(form);
-        
+
         try {
             const response = await axios.post(`${backendUrl}/signin`, form)
-            if(response.status === 200) {
+            if (response.status === 200) {
                 toast.success('Sign In Successfull');
                 dispatch(login(response.data));
-                console.log(response.data);
-                response.data.role === 'user' ? navigate('/') : navigate('/dashboard')
+                response.data.user.role === 'user' ? navigate('/') : navigate('/admin/dashboard')
             }
         } catch (error) {
             console.error(error);
-            toast.error(error.response.data.message || 'Something went wrong while Sign In')
+            let errorMessage = error.response.data.message;
+            if (errorMessage === 'User not Found') setErrors({ ...errors, email: errorMessage })
+            else if (errorMessage === 'Wrong password') setErrors({ ...errors, password: errorMessage })
+            else toast.error('Something went wrong while Sign In')
         }
     }
 
@@ -88,7 +92,9 @@ const SignIn = () => {
                             placeholder='you@example.com'
                             svg_path={icon_paths.email}
                             handleChange={handleChange}
+                            err={errors.email}
                         />
+                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
 
                         <InputField
                             label='Password'
@@ -97,7 +103,9 @@ const SignIn = () => {
                             placeholder='Enter your password'
                             svg_path={icon_paths.password}
                             handleChange={handleChange}
+                            err={errors.password}
                         />
+                        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
 
                         {/* Submit Button */}
                         <button

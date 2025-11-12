@@ -1,23 +1,20 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
 
-const protect = async (req, res, next) => {
-  try {
-    const token = req.cookies.jwt;
+const protect = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1]
 
-    if (!token) {
-      return res.status(401).json({ message: 'Not authorized, no token' });
+    if(!token){
+        return res.status(403).json({message: 'Token is required'})
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = await User.findById(decoded.userId).select('-password');
-
-    next();
-  } catch (error) {
-    console.error('Auth error:', error);
-    res.status(401).json({ message: 'Not authorized, token invalid' });
-  }
-};
+    jwt.verify(token, process.env.JWT_SECRET, (err,decoded) => {
+        if(err){
+            return res.status(403).json({message: 'Token is invalid'})
+        }
+        
+        req.user = decoded
+        next()
+    })
+}
 
 module.exports = protect;

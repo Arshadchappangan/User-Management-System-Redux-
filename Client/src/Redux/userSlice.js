@@ -16,11 +16,11 @@ const userSlice = createSlice({
     initialState : INITIAL_STATE,
     reducers : {
         login : (state,action) => {
-            state.name = action.payload.name;
-            state.email = action.payload.email;
-            state.role = action.payload.role;
-            state.id = action.payload._id;
-            state.profileImage = action.payload.profileImage || null;
+            state.name = action.payload.user.name;
+            state.email = action.payload.user.email;
+            state.role = action.payload.user.role;
+            state.id = action.payload.user._id;
+            state.profileImage = action.payload.user.profileImage || null;
             state.auth = true;
             state.token = action.payload.token;
         },

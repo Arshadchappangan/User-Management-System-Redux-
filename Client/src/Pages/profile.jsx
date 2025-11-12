@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../Redux/userSlice";
+import { logout, setProfileImage } from "../Redux/userSlice";
 import { toast } from "react-toastify";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -17,11 +17,13 @@ const profile = () => {
     const [file, setFile] = useState(null);
 
     useEffect(() => {
-        console.log('id : ', id)
+
         const getUser = async () => {
             try {
                 const response = await axios.get(`${backendUrl}/user/${id}`, {
-                    withCredentials: true,
+                    headers : {
+                        Authorization : `Bearer ${token}`
+                    }
                 })
                 setImage(response.data.user.profileImage);
             } catch (error) {
@@ -45,12 +47,13 @@ const profile = () => {
         try {
             const formData = new FormData();
             formData.append('image', file);
-            await axios.post(`${backendUrl}/profile/upload/${id}`, formData, {
-                withCredentials: true,
-                headers: { 'Content-Type': 'multipart/form-data' }
+            let response = await axios.post(`${backendUrl}/profile/upload/${id}`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             toast.success('Profile Image Updated');
+            dispatch(setProfileImage(response.data.profileImage))
+            setFile(null);
             setRefresh(!refresh);
         } catch (error) {
             if (error.response?.status === 403) {
@@ -119,7 +122,8 @@ const profile = () => {
                             onChange={(e) => setFile(e.target.files[0])}
                             className="hidden"
                         />
-                        {file ? file.name : "Choose Image"}
+                        {file ? file.name :
+                        image ? 'Change Image' : "Choose Image"}
                     </label>
 
                     <button

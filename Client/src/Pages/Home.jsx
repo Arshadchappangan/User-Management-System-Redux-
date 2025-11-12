@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../Redux/userSlice';
 import { useState } from 'react';
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 const HomePage = () => {
@@ -10,6 +11,7 @@ const HomePage = () => {
     const dispatch = useDispatch();
 
     const { name, id, profileImage } = useSelector(state => state.user);
+    console.log(profileImage)
 
     const handleLogout = () => {
         dispatch(logout());
@@ -38,7 +40,7 @@ const HomePage = () => {
             );
         }
 
-        const resolved = src.startsWith('http') ? src : `http://localhost:3555/uploads/${src}`;
+        const resolved = src.startsWith('http') ? src : `${backendUrl}/uploads/${src}`;
 
         return (
             <img src={resolved} alt={name || 'Profile'}

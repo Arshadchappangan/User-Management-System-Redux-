@@ -4,9 +4,6 @@ const protect = require('../middlewares/authMiddleware');
 const router = express.Router();
 const upload = require('../config/multer')
 
-router.get('/',(req,res) => {
-    res.send('<h1>User Home Page</h1>');
-})
 
 router.post('/signup', userSignup);
 router.post('/signin', userLogin);
