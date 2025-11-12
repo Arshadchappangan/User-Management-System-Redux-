@@ -309,25 +309,23 @@ const AdminDashboard = () => {
         {/* Pagination */}
         <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-xl px-6 py-4 text-gray-200">
           <div className="flex justify-between items-center">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+              className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
+            >
+              Prev
+            </button>
             <span>
               Page <strong>{page}</strong> of <strong>{pages}</strong>
             </span>
-            <div className="flex gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
-              >
-                Prev
-              </button>
-              <button
-                disabled={page === pages}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
+            <button
+              disabled={page === pages}
+              onClick={() => setPage((p) => p + 1)}
+              className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
