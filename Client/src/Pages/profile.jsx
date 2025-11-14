@@ -21,8 +21,8 @@ const profile = () => {
         const getUser = async () => {
             try {
                 const response = await axios.get(`${backendUrl}/user/${id}`, {
-                    headers : {
-                        Authorization : `Bearer ${token}`
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
                 })
                 setImage(response.data.user.profileImage);
@@ -82,7 +82,7 @@ const profile = () => {
 
             <div className="relative w-full max-w-md bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl p-8 border border-white/10 space-y-6 z-10">
                 <h2 className="text-3xl font-bold text-center text-white">
-                    Profile Page
+                    Profile
                 </h2>
 
                 <div className="flex justify-center">
@@ -123,15 +123,27 @@ const profile = () => {
                             className="hidden"
                         />
                         {file ? file.name :
-                        image ? 'Change Image' : "Choose Image"}
+                            image ? 'Change Image' : "Choose Image"}
                     </label>
 
-                    <button
-                        onClick={handleUpload}
-                        className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-semibold py-2 rounded-md shadow-lg hover:from-amber-500 hover:to-yellow-600 transition duration-300"
-                    >
-                        Upload Image
-                    </button>
+                    {
+                        file && <div className="w-full flex justify-center gap-4">
+                            <button
+                                onClick={() => setFile(null)}
+                                className="w-2xs px-2 bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold py-2 rounded-md shadow-lg hover:from-red-500 hover:to-red-600 transition duration-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUpload}
+                                className="w-2xs px-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-semibold py-2 rounded-md shadow-lg hover:from-amber-500 hover:to-yellow-600 transition duration-300"
+                            >
+                                Upload Image
+                            </button>
+                        </div>
+
+                    }
+
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import InputField from "../Components/InputField";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch} from "react-redux";
 import { toast } from "react-toastify";
 import { login } from "../Redux/userSlice";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ const icon_paths = {
 }
 
 const SignIn = () => {
+
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -55,6 +56,8 @@ const SignIn = () => {
             </div>
 
             <div className="relative w-full max-w-md">
+
+
                 {/* Card */}
                 <div className="bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl p-8 border border-white/10">
                     {/* Logo/Icon area */}
@@ -94,7 +97,7 @@ const SignIn = () => {
                             handleChange={handleChange}
                             err={errors.email}
                         />
-                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
                         <InputField
                             label='Password'

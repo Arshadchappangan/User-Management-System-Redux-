@@ -28,13 +28,23 @@ const createUser = async (req, res) => {
     try {
         let { name, email, password } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(404).json({ success: true, message: 'All fields are required' });
+        if (!name.trim()) return res.status(400).json({ success: false, message: 'Name is required' });
+        if (!email.trim()) return res.status(400).json({ success: false, message: 'Email is required' });
+        if (!password.trim()) return res.status(400).json({ success: false, message: 'Password is required' });
+
+        if (name.trim().length < 3) {
+            return res.status(400).json({ success: false, message: 'Please enter full name (min 3 characters)' });
         }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if (!emailRegex.test(email)) return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
+        if (!passwordRegex.test(password)) return res.status(400).json({ success: false, message: 'Password must be at least 8 characters and include upper, lower and a number' });
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(404).json({ success: false, message: 'User already exists' });
+            return res.status(400).json({ success: false, message: 'User already exists' });
         }
 
         let salt = await bcrypt.genSalt(10);
@@ -60,12 +70,15 @@ const updateUser = async (req, res) => {
         let userId = req.params.id;
         let { name, email } = req.body;
 
-        name = name.trim();
-        email = email.trim();
+        if (!name.trim()) return res.status(400).json({ success: false, message: 'Name is required' });
+        if (!email.trim()) return res.status(400).json({ success: false, message: 'Email is required' });
 
-        if (!name || !email) {
-            return res.status(400).json({ success: false, message: 'All fields are required' });
+        if (name.trim().length < 3) {
+            return res.status(400).json({ success: false, message: 'Please enter full name (min 3 characters)' });
         }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
 
         const existingUser = await User.findOne({ email, _id: { $ne: userId } });
         if (existingUser) {

@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 
 function App() {
 
+  console.log('state', useSelector(state => state))
   const { auth, role } = useSelector(state => state.user);
 
   const Authenticated = ({ element, allowedRoles }) => {

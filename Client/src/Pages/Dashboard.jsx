@@ -21,6 +21,7 @@ const AdminDashboard = () => {
   const [pages, setTotalPages] = useState(1);
   const [id, setEditId] = useState("");
   const [totalUsers, setTotalUsers] = useState(0);
+  const [errors, setErrors] = useState({ name: '', email: '', password: '' });
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.user);
@@ -59,17 +60,33 @@ const AdminDashboard = () => {
 
   const handleSave = async () => {
     if (editingUser) {
-      try {
-        await axios.put(`${backendUrl}/admin/edit-user/${id}`,
-          { name: formData.name, email: formData.email },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success("User details updated.");
-        setShowModal(false);
-        fetchUser();
-      } catch (error) {
-        toast.error(error.response?.data?.message || "Error editing user.");
-      }
+      Swal.fire({
+        title: "Confirm Update",
+        text: "Are you sure you want to update this user's details?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Update",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            await axios.put(`${backendUrl}/admin/edit-user/${id}`,
+              { name: formData.name, email: formData.email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success("User details have been updated");
+            setShowModal(false);
+            fetchUser();
+          } catch (error) {
+            let errorMessage = error.response?.data?.message;
+            if (errorMessage.toLowerCase().includes("email")) setErrors({ ...errors, email: errorMessage });
+            else if (errorMessage.toLowerCase().includes("user")) setErrors({ ...errors, email: errorMessage });
+            else if (errorMessage.toLowerCase().includes("name")) setErrors({ ...errors, name: errorMessage });
+            else toast.error("Error updating user.");
+          }
+        }
+      });
     } else {
       try {
         await axios.post(`${backendUrl}/admin/create-user`, formData, {
@@ -79,7 +96,12 @@ const AdminDashboard = () => {
         setShowModal(false);
         fetchUser();
       } catch (error) {
-        toast.error(error.response?.data?.message || "Error creating user.");
+        let errorMessage = error.response?.data?.message;
+        if (errorMessage.toLowerCase().includes('email')) setErrors({ ...errors, email: errorMessage });
+        else if (errorMessage.toLowerCase().includes('user')) setErrors({ ...errors, email: errorMessage });
+        else if (errorMessage.toLowerCase().includes('name')) setErrors({ ...errors, name: errorMessage });
+        else if (errorMessage.toLowerCase().includes('password')) setErrors({ ...errors, password: errorMessage });
+        else toast.error("Error creating user.");
       }
     }
   };
@@ -116,6 +138,24 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out of your session!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(logout());
+        toast.info("Logged out successfully!");
+        navigate("/signin");
+      }
+    });
+  }
+
   const filteredUsers = users
     .filter((u) => u.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => new Date(b.createAt) - new Date(a.createAt));
@@ -130,11 +170,7 @@ const AdminDashboard = () => {
             <p className="text-sm text-gray-300">Manage and monitor user accounts</p>
           </div>
           <button
-            onClick={() => {
-              dispatch(logout());
-              toast.info("Logged out successfully!");
-              navigate("/signin");
-            }}
+            onClick={handleLogout}
             className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-5 py-2.5 rounded-lg shadow-md hover:from-amber-500 hover:to-yellow-600 transition-all font-medium"
           >
             <svg
@@ -309,23 +345,28 @@ const AdminDashboard = () => {
         {/* Pagination */}
         <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-xl px-6 py-4 text-gray-200">
           <div className="flex justify-between items-center">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-              className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
-            >
-              Prev
-            </button>
+            <div>
+              {page > 1 && <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
+              >
+                Page {page - 1}
+              </button>}
+            </div>
             <span>
               Page <strong>{page}</strong> of <strong>{pages}</strong>
             </span>
-            <button
-              disabled={page === pages}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
-            >
-              Next
-            </button>
+            <div>
+              {page < pages && <button
+                disabled={page === pages}
+                onClick={() => setPage((p) => p + 1)}
+                className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
+              >
+                Page {page + 1}
+              </button>}
+            </div>
+
           </div>
         </div>
       </div>
@@ -352,13 +393,16 @@ const AdminDashboard = () => {
                 </label>
                 <input
                   type="text"
-                  className="bg-white/10 border border-white/20 p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className={`bg-white/10 border ${errors.name ? 'border-red-500' : 'border-white/20'} p-3 w-full rounded-lg focus:outline-none focus:ring-2 ${errors.name ? 'focus: ring-red-500' : 'focus: ring-amber-400'}`}
                   placeholder="Enter full name"
                   value={formData.name}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setErrors({ ...errors, name: '' })
                     setFormData({ ...formData, name: e.target.value })
                   }
+                  }
                 />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">
@@ -366,13 +410,16 @@ const AdminDashboard = () => {
                 </label>
                 <input
                   type="email"
-                  className="bg-white/10 border border-white/20 p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className={`bg-white/10 border ${errors.email ? 'border-red-500' : 'border-white/20'} p-3 w-full rounded-lg focus:outline-none focus:ring-2 ${errors.email ? 'focus: ring-red-500' : 'focus: ring-amber-400'}`}
                   placeholder="Enter email"
                   value={formData.email}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setErrors({ ...errors, email: '' })
                     setFormData({ ...formData, email: e.target.value })
                   }
+                  }
                 />
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
               {!editingUser && (
                 <div>
@@ -381,16 +428,19 @@ const AdminDashboard = () => {
                   </label>
                   <input
                     type="password"
-                    className="bg-white/10 border border-white/20 p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    className={`bg-white/10 border ${errors.password ? 'border-red-500' : 'border-white/20'} p-3 w-full rounded-lg focus:outline-none focus:ring-2 ${errors.password ? 'focus: ring-red-500' : 'focus: ring-amber-400'}`}
                     placeholder="Enter password"
                     value={formData.password}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setErrors({ ...errors, password: '' })
                       setFormData({
                         ...formData,
                         password: e.target.value,
                       })
                     }
+                    }
                   />
+                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                 </div>
               )}
             </div>
