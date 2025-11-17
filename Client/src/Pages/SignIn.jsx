@@ -1,10 +1,11 @@
 import axios from "axios";
 import InputField from "../Components/InputField";
-import { useState } from "react";
-import { useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { login } from "../Redux/userSlice";
 import { useNavigate } from "react-router-dom";
+import { useReducer } from "react";
+import { reducer, types } from "../Reducers/authFormReducer";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
@@ -13,35 +14,48 @@ const icon_paths = {
     password: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
 }
 
-const SignIn = () => {
+const initialState = {
+    form: { email: "", password: "" },
+    errors: { email: "", password: "" }
+};
 
+const SignIn = () => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [form, setForm] = useState({ email: '', password: '' });
-    const [errors, setErrors] = useState({ email: '', password: '' })
+
+    const [state, localDispath] = useReducer(reducer, initialState)
+    const { form, errors } = state;
 
     const handleChange = (e) => {
-        setErrors({...errors,[e.target.name]:''})
-        setForm({ ...form, [e.target.name]: e.target.value })
-    }
+        const { name, value } = e.target;
+        localDispath({ type: types.CHANGE_FIELD, field: name, value });
+        localDispath({ type: types.VALIDATE_FIELD, field: name, value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(form);
+
+        Object.entries(form).forEach(([key, value]) =>
+            localDispath({ type: types.VALIDATE_FIELD, field: key, value })
+        );
+
+        const hasErrors = Object.values(state.errors).some((msg) => msg !== "");
+        if (hasErrors || Object.values(form).some((val) => val === "")) return;
 
         try {
             const response = await axios.post(`${backendUrl}/signin`, form)
             if (response.status === 200) {
                 toast.success('Sign In Successfull');
                 dispatch(login(response.data));
-                response.data.user.role === 'user' ? navigate('/') : navigate('/admin/dashboard')
+                navigate('/')
             }
         } catch (error) {
             console.error(error);
             let errorMessage = error.response.data.message;
-            if (errorMessage === 'User not Found') setErrors({ ...errors, email: errorMessage })
-            else if (errorMessage === 'Wrong password') setErrors({ ...errors, password: errorMessage })
+            if (errorMessage === 'User not Found') localDispath({ type : types.SET_ERROR, field : 'email', message : errorMessage })
+            else if (errorMessage === 'Wrong password') localDispath({ type : types.SET_ERROR, field : 'password', message : errorMessage })
             else toast.error('Something went wrong while Sign In')
         }
     }

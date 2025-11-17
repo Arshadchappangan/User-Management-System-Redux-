@@ -9,6 +9,8 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [pages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -18,22 +20,21 @@ const AdminDashboard = () => {
     password: "",
   });
   const [page, setPage] = useState(1);
-  const [pages, setTotalPages] = useState(1);
   const [id, setEditId] = useState("");
-  const [totalUsers, setTotalUsers] = useState(0);
   const [errors, setErrors] = useState({ name: '', email: '', password: '' });
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.user);
 
-  useEffect(() => {
 
+  useEffect(() => {
     fetchUser();
-  }, [page]);
+  }, [page, search]);
+
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${backendUrl}/admin/dashboard?page=${page}&limit=5`,
+      const response = await axios.get(`${backendUrl}/admin/dashboard?page=${page}&limit=5&search=${search}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUsers(response?.data?.users);
@@ -124,16 +125,11 @@ const AdminDashboard = () => {
           });
           toast.success("User deleted successfully!");
           fetchUser();
-
         } catch (error) {
-          Swal.fire(
-            "Error!",
-            error.response?.data?.message || "Failed to delete user.",
-            "error"
-          );
+          toast.error(error.response?.data?.message || "Error deleting user");
+          console.error(error);
         }
-      } else {
-        toast.info("Deletion cancelled.");
+
       }
     });
   };
@@ -156,9 +152,6 @@ const AdminDashboard = () => {
     });
   }
 
-  const filteredUsers = users
-    .filter((u) => u.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => new Date(b.createAt) - new Date(a.createAt));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-zinc-900 to-slate-900 text-white">
@@ -288,8 +281,8 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.length ? (
-                  filteredUsers.map((user, i) => (
+                {users.length ? (
+                  users.map((user) => (
                     <tr
                       key={user._id}
                       className="hover:bg-white/5 transition"
@@ -348,7 +341,7 @@ const AdminDashboard = () => {
             <div>
               {page > 1 && <button
                 disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
+                onClick={() => dispatch(setPage(page - 1))}
                 className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
               >
                 Page {page - 1}
@@ -360,7 +353,7 @@ const AdminDashboard = () => {
             <div>
               {page < pages && <button
                 disabled={page === pages}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => dispatch(setPage(page + 1))}
                 className="px-4 py-2 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-40"
               >
                 Page {page + 1}

@@ -16,6 +16,7 @@ const profile = () => {
     const { name, id, email, token } = useSelector(state => state.user);
     const [file, setFile] = useState(null);
 
+
     useEffect(() => {
 
         const getUser = async () => {
@@ -90,7 +91,7 @@ const profile = () => {
                         <img
                             src={`${backendUrl}/uploads/${image}`}
                             alt="Profile"
-                            className="w-32 h-32 rounded-full object-cover border-4 border-amber-400 shadow-lg"
+                            className="w-32 h-32 rounded-full object-cover object-top border-4 border-amber-400 shadow-lg"
                         />
                     ) : (
                         <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center text-gray-300 shadow-md border border-white/10">
@@ -109,6 +110,17 @@ const profile = () => {
                     </p>
                 </div>
 
+                {
+                    file && <div className="flex items-center flex-col">
+                        <img
+                            src={URL.createObjectURL(file)}
+                            alt="Preview"
+                            className="text-white w-64 h-64 object-cover object-top overflow-hidden border-2 border-amber-400 shadow-lg"
+                        />
+                        <h5 className="text-white">{file.name}</h5>
+                    </div>
+                }
+
 
                 <div className="flex flex-col items-center space-y-3">
                     <label
@@ -122,8 +134,7 @@ const profile = () => {
                             onChange={(e) => setFile(e.target.files[0])}
                             className="hidden"
                         />
-                        {file ? file.name :
-                            image ? 'Change Image' : "Choose Image"}
+                        {file ? 'Change Image' : "Choose Image"}
                     </label>
 
                     {

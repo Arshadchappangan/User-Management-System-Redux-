@@ -6,16 +6,21 @@ const getUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
+        const search = req.query.search || '';
         const skip = (page - 1) * limit;
 
-        const users = await User.find({ role: 'user' }).skip(skip).limit(limit).lean();
+        const query = search
+            ? { name: { $regex: search, $options: "i" } }
+            : {};
+
+        const users = await User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
         const total = await User.countDocuments({ role: 'user' });
 
         res.send({
             users,
             total,
             page,
-            pages: Math.ceil(total / limit)
+            pages: Math.ceil((search ? users.length : total) / limit)
         })
 
     } catch (error) {
@@ -101,7 +106,6 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         let userId = req.params.id;
-
         await User.findByIdAndDelete(userId);
         res.send({ message: 'User Deleted' });
     } catch (error) {

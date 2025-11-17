@@ -3,75 +3,13 @@ import InputField from "../Components/InputField";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { initialState, reducer, types } from '../Reducers/authFormReducer'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const icon_paths = {
   name: "M12 4a4 4 0 1 1 0 8a4 4 0 0 1 0-8zM4 20c0-4 4-6 8-6s8 2 8 6",
   email: "M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207",
   password: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
-};
-
-const types = {
-  CHANGE_FIELD: "CHANGE_FIELD",
-  VALIDATE_FIELD: "VALIDATE_FIELD",
-  RESET_FORM: "RESET_FORM",
-};
-
-
-const initialState = {
-  form: { name: "", email: "", password: "", confirmPassword: "" },
-  errors: { name: "", email: "", password: "", confirmPassword: "" },
-};
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case types.CHANGE_FIELD:
-      return {
-        ...state,
-        form: { ...state.form, [action.field]: action.value },
-      };
-
-    case types.VALIDATE_FIELD:
-      const { field, value } = action;
-      let message = "";
-
-      if (field === "name") {
-        if (!value || value.trim().length < 3)
-          message = "Please enter full name (min 3 characters)";
-      }
-
-      if (field === "email") {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!value.trim()) message = "Email is required";
-        else if (!emailRegex.test(value))
-          message = "Please enter a valid email address";
-      }
-
-      if (field === "password") {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        if (!value.trim()) message = "Password is required";
-        else if (!passwordRegex.test(value))
-          message =
-            "Password must be at least 8 characters and include upper, lower and a number";
-      }
-
-      if (field === "confirmPassword") {
-        if (!value) message = "Please confirm your password";
-        else if (value !== state.form.password)
-          message = "Passwords do not match";
-      }
-
-      return {
-        ...state,
-        errors: { ...state.errors, [field]: message },
-      };
-
-    case types.RESET_FORM:
-      return initialState;
-
-    default:
-      return state;
-  }
 };
 
 const SignUp = () => {
@@ -87,18 +25,13 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('signup')
-    console.log(form)
 
     Object.entries(form).forEach(([key, value]) =>
       dispatch({ type: types.VALIDATE_FIELD, field: key, value })
     );
 
     const hasErrors = Object.values(state.errors).some((msg) => msg !== "");
-    if (hasErrors || Object.values(form).some((val) => val === "")) {
-      toast.error("Please fix the highlighted errors");
-      return;
-    }
+    if (hasErrors || Object.values(form).some((val) => val === "")) return;
 
     try {
       const response = await axios.post(`${backendUrl}/signup`, {
@@ -107,7 +40,6 @@ const SignUp = () => {
         password: form.password,
       });
 
-      console.log(response.status);
       
       if (response.status == 201) {
         dispatch({ type: types.RESET_FORM });
@@ -157,7 +89,7 @@ const SignUp = () => {
           </div>
 
           {/* Form */}
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit} autoComplete="off">
             <InputField
               handleChange={handleChange}
               label="Name"

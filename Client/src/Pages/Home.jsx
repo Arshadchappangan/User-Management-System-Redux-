@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../Redux/userSlice';
 import { useState } from 'react';
+import Swal from 'sweetalert2'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
@@ -12,11 +13,6 @@ const HomePage = () => {
 
     const { name, id, profileImage } = useSelector(state => state.user);
     console.log(profileImage)
-
-    const handleLogout = () => {
-        dispatch(logout());
-        navigate('/signin')
-    }
 
     const handleProfile = () => {
         navigate(`/profile/${id}`);
@@ -54,6 +50,24 @@ const HomePage = () => {
             />
         );
     };
+
+    const handleLogout = () => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You will be logged out of your session!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Logout",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                dispatch(logout());
+                toast.info("Logged out successfully!");
+                navigate("/signin");
+            }
+        });
+    }
 
 
 
